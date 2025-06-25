@@ -3,7 +3,7 @@ import {delay} from "../helpers/delay";
 
 const users = [
     { username: 'admin', password: 'admin123' },
-    { username: 'trader', password: 'trade2023' }
+    { username: 'trader', password: 'trade2020' }
 ];
 
 const generateToken = (username: string): string => {
