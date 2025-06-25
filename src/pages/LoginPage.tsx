@@ -1,10 +1,11 @@
-import React from 'react';
+import React, {useState} from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
-import { Button, Card, Form, Input, Layout, Typography } from 'antd';
+import { Button, Card, Form, Input, Layout, Typography, Alert } from 'antd';
 import { LockOutlined, UserOutlined } from '@ant-design/icons';
 import { loginUser } from '../api';
 import { useAuth } from '../context/AuthContext';
+import {AxiosError} from "axios";
 
 const { Content } = Layout;
 const { Title } = Typography;
@@ -16,6 +17,7 @@ type LoginFormValues = {
 
 export const LoginPage: React.FC = () => {
     const navigate = useNavigate();
+    const [error, setError] = useState('')
     const { login } = useAuth();
 
     const {
@@ -35,7 +37,18 @@ export const LoginPage: React.FC = () => {
             login(tokenData.access_token);
             navigate('/');
         } catch (err) {
-            console.error('Login failed:', err);
+           const error = err as AxiosError<{message: string}>
+            if (error.response) {
+                if (error.response.data && typeof error.response.data === 'object') {
+                    const responseData = error.response.data as { message?: string };
+
+                    if (responseData.message) {
+                        setError(responseData.message);
+                    } else {
+                        setError(`Server error: ${error.response.status}`);
+                    }
+                }
+            }
         }
     };
 
@@ -89,6 +102,17 @@ export const LoginPage: React.FC = () => {
                                 )}
                             />
                         </Form.Item>
+
+                        {error && (
+                            <Form.Item>
+                                <Alert
+                                    message={error}
+                                    type="error"
+                                    showIcon
+                                    style={{ marginBottom: 16 }}
+                                />
+                            </Form.Item>
+                        )}
 
                         <Form.Item>
                             <Button
